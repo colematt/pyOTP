@@ -18,9 +18,16 @@ TOKEN = "12345678901234567890"
 
 """
 Notations specified by RFC 4226 and RFC 6238
+C : the 8-byte counter value, the moving factor. This value must be synchronized
+	between client and server.
+K : the shared secret between client and server; each HOTP generator has a
+	different and unique secret K.
 X : the time step in seconds. Default: X = 30
 TO: the unix time to start counting time steps (i.e. the Unix epoch)
 	T0 = Thu Jan 1 00:00:00 1970
+T : number of time steps between the initial counter time T0 and the current
+	Unix time
+digit : the number of digits in the output, left padded with '0' as required
 """
 
 def T(t, X=30):
@@ -36,20 +43,21 @@ def T(t, X=30):
 	# and integer division
 	return int(t // X)
 
-def HOTP(K,C,digits=6, mode="sha1"):
+def HOTP(K,C,digit=6, mode="sha1"):
 	"""
-	Return the HOTP-value for Key <K>, Counter <C>, with <digits> width, 
-	and hashing mode <mode>.
+	Return the HOTP-value for Key <K>, Counter <C>, with <digits> width,
+	and hashing mode <mode>. Return type is a string.
 	"""
 	value = 0xc0ffee
 	value %= 10 ** 6
-	return str(value).rjust(digits,"0")
+	return str(value).rjust(digit,"0")
 
-def TOTP(K,T,digits=6, mode="sha1"):
+def TOTP(K,T,digit=6, mode="sha1"):
 	"""
-	Return the TOTP-value for Key <K>, Time Step <T>, with <digits> width
+	Return the TOTP-value for Key <K>, Time Step <T>, with <digits> width,
+	and hashing mode <mode>. Return type is a string.
 	"""
-	return HOTP(K,T,digits)
+	return HOTP(K,T,digit)
 
 if __name__ == "__main__":
 

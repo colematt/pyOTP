@@ -8,6 +8,7 @@ Date: 11/20/16
 import time
 import sys
 import otp
+import argparse
 
 """
 Utility functions
@@ -47,33 +48,47 @@ def _expirebar(t, width=10, filltime=30):
 
 if __name__ == "__main__":
 
-	DIGITS = 6
-	TIME = 30
+	# Argument parsing
+	parser = argparse.ArgumentParser(description='Demonstrate the TOTP algorithm')
+	parser.add_argument('qrfile', help="path to the shared secret key QR Code")
+	parser.add_argument('-d', '--digits', help="number of digits in output", type=int, choices = [6, 7, 8], default=6)
+	parser.add_argument('-t', '--time', help="time step in seconds between outputs", type=int, default=30)
+	parser.add_argument('-m' '--mode', help="cryptographic hash function selection", choices=["sha1", "sha256", "sha512"], default="sha1")
+	args = parser.parse_args()
+
+	digit = args.digits
+	x = args.time
 
 	# Print the header
 	print(_header())
 
 	# Calculate first step
 	now = int(time.time())
-	next = now - (now % TIME) + TIME
-	ts = otp.T(now, TIME)
-	totp = otp.TOTP(otp.TOKEN,ts,DIGITS)
+	next = now - (now % x) + x
+	ts = otp.T(now, x)
+	totp = otp.TOTP(otp.TOKEN,ts,digit)
 
 
 	# Continue generating TOTP passwords until halted by user
 	while(True):
 
 		# Print the next TOTP data
-		print(time.asctime(time.localtime(now)), hex(ts).ljust(18), totp.ljust(DIGITS), sep=" ", end = " ")
+		print(time.asctime(time.localtime(now)), hex(ts).ljust(18), totp.ljust(digit), sep=" ", end = " ")
 		sys.stdout.flush()
 
 		# Print the next expiration bar
-		_expirebar(now, filltime=TIME)
-		print("")
-		sys.stdout.flush()
+		try:
+			_expirebar(now, filltime=x)
+		except (KeyboardInterrupt, SystemExit):
+			print("\nExiting OTP Demo...")
+			sys.exit(0)
+		finally:
+			print("")
+			sys.stdout.flush()
+
 
 		# Step forward, recalculate T
 		now = next
-		next += TIME
-		ts = otp.T(now, TIME)
-		totp = otp.TOTP(otp.TOKEN,ts,DIGITS)
+		next += x
+		ts = otp.T(now, x)
+		totp = otp.TOTP(otp.TOKEN,ts,digit)
