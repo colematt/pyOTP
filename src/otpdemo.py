@@ -13,8 +13,8 @@ try:
 	from PIL import Image
 	import zbarlight
 except(ImportError):
-	print("pyOTP requires zbarlight.", file=sys.stderr)
-	print("See: https://github.com/Polyconseil/zbarlight for more information", file=sys.stderr)
+	print("Prerequisites not met! pyOTP requires zbarlight.", file=sys.stderr)
+	print("See https://github.com/Polyconseil/zbarlight for more information.", file=sys.stderr)
 	sys.exit(0)
 
 """
@@ -63,7 +63,6 @@ if __name__ == "__main__":
 	parser.add_argument('-m', '--mode', help="cryptographic hash function selection", choices=["sha1", "sha256", "sha512"], default="sha1")
 
 	args = parser.parse_args()
-	print(args)
 	digit = args.digits
 	x = args.time
 	mode = args.mode
@@ -71,15 +70,20 @@ if __name__ == "__main__":
 	### QR Code reading using zbarlite
 	try:
 		with open(args.qrfile, 'rb') as image_file:
-    		image = Image.open(image_file)
-    		image.load()
+			image = Image.open(image_file)
+			image.load()
 		codes = zbarlight.scan_codes('qrcode', image)
 	except(IOError):
 		print("Cannot open %s" % args.qrfile, file=sys.stderr)
 		exit(0)
 
 	if codes:
-		token = int(codes)
+		if len(codes) == 1:
+			token = int(codes[0].decode())
+		else:
+			print("Found %i valid QR Codes in %s. Cannot decode!" \
+			% (len(codes), args.qrfile), file=sys.stderr)
+			exit(0)
 	else:
 		print("Did not find a valid QR Code in %s" % args.qrfile, file=sys.stderr)
 		exit(0)
