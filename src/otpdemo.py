@@ -54,8 +54,8 @@ if __name__ == "__main__":
 	parser.add_argument('-d', '--digits', help="number of digits in output", type=int, choices = [6, 7, 8], default=6)
 	parser.add_argument('-t', '--time', help="time step in seconds between outputs", type=int, default=30)
 	parser.add_argument('-m' '--mode', help="cryptographic hash function selection", choices=["sha1", "sha256", "sha512"], default="sha1")
-	args = parser.parse_args()
 
+	args = parser.parse_args()
 	digit = args.digits
 	x = args.time
 
@@ -67,7 +67,6 @@ if __name__ == "__main__":
 	next = now - (now % x) + x
 	ts = otp.T(now, x)
 	totp = otp.TOTP(otp.TOKEN,ts,digit)
-
 
 	# Continue generating TOTP passwords until halted by user
 	while(True):
@@ -85,7 +84,6 @@ if __name__ == "__main__":
 		finally:
 			print("")
 			sys.stdout.flush()
-
 
 		# Step forward, recalculate T
 		now = next
