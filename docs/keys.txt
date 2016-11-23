@@ -1,0 +1,8 @@
+Android Google Authenticator QRCode (android-qrcode.png)
+4oq4 5vjr ywvc jxbb ry4t lcei nsz4 m76z
+
+iOS Google Authenticator QRCode (ios-qrcode.png)
+ouew m462 h5ke qwkj vnyb b6pu h77p vdol
+
+RFC 6238 QRCode (qrcode.png)
+1234 5678 9012 3456 7890
