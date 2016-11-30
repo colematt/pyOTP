@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
 	if codes:
 		if len(codes) == 1:
-			token = int(codes[0].decode())
+			token = codes[0].decode()
 		else:
 			print("Found %i valid QR Codes in %s. Cannot decode!" \
 			% (len(codes), args.qrfile), file=sys.stderr)
