@@ -105,12 +105,10 @@ def HOTP(K,C,digit=6, digest=hashlib.sha1):
 	# a multiple of block size (8)
 	# Then decode it to a bytes object
 	K = str(K)
-	print("K", K)
 	pad = len(K) % 8
 	if pad != 0:
 		K += '=' * (8 - pad)
-		print("K", K)
-		K = base64.b32decode(K, casefold=True)
+	K = base64.b32decode(K, casefold=True)
 
 	# Convert the counter to a byte array
 	ba = bytearray()

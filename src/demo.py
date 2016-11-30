@@ -75,9 +75,6 @@ if __name__ == "__main__":
 		_,_,secret,_,mode,digit,x = otp.deprovision(codes[0].decode())
 		mode = otp.DIGESTS[mode]
 
-		# Print Debug
-		print(secret, mode, digit, x)
-
 	else:
 		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), args.qrfile), file=sys.stderr)
 		exit(0)
