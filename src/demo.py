@@ -58,14 +58,7 @@ if __name__ == "__main__":
 	# Argument parsing
 	parser = argparse.ArgumentParser(description='Demonstrate the TOTP algorithm')
 	parser.add_argument('qrfile', help="path to the shared secret key QR Code .png file")
-	parser.add_argument('-d', '--digits', help="number of digits in output", type=int, choices = [6, 7, 8], default=6)
-	parser.add_argument('-t', '--time', help="time step in seconds between outputs", type=int, default=30)
-	parser.add_argument('-m', '--mode', help="cryptographic hash function selection", choices=["sha1", "sha256", "sha512"], default="sha1")
-
 	args = parser.parse_args()
-	digit = args.digits
-	x = args.time
-	mode = args.mode
 
 	### QR Code reading using zbarlite
 	try:
@@ -77,15 +70,16 @@ if __name__ == "__main__":
 		print("Cannot open %s" % args.qrfile, file=sys.stderr)
 		exit(0)
 
-	if codes:
-		if len(codes) == 1:
-			token = codes[0].decode()
-		else:
-			print("Found %i valid QR Codes in %s. Cannot decode!" \
-			% (len(codes), args.qrfile), file=sys.stderr)
-			exit(0)
+	#If there's a readable barcode, deprovision it
+	if len(codes) == 1:
+		_,_,secret,_,mode,digit,x = otp.deprovision(codes[0].decode())
+		mode = otp.DIGESTS[mode]
+
+		# Print Debug
+		print(secret, mode, digit, x)
+
 	else:
-		print("Did not find a valid QR Code in %s" % args.qrfile, file=sys.stderr)
+		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), args.qrfile), file=sys.stderr)
 		exit(0)
 
 	# Print the header
@@ -95,7 +89,7 @@ if __name__ == "__main__":
 	now = int(time.time())
 	next = now - (now % x) + x
 	ts = otp.T(now, x)
-	totp = otp.TOTP(token,ts,digit)
+	totp = otp.TOTP(secret,ts,digit=digit, digest=mode)
 
 	# Continue generating TOTP passwords until halted by user
 	while(True):
@@ -118,4 +112,4 @@ if __name__ == "__main__":
 		now = next
 		next += x
 		ts = otp.T(now, x)
-		totp = otp.TOTP(token,ts,digit)
+		totp = otp.TOTP(secret,ts,digit=digit, digest=mode)

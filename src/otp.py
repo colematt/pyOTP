@@ -5,15 +5,17 @@ File: otp.py
 Author: Matthew Cole, Anh Quach, Dan Townley
 Date: 11/20/16
 """
+import math
 import time
 import hashlib
 import hmac
+import base64
 
 """
 Constants specified by RFC 6238
 """
 
-MODES = {"sha1", "sha256", "sha512"}
+DIGESTS = {"sha1":hashlib.sha1, "sha256":hashlib.sha256, "sha512":hashlib.sha512}
 
 
 """
@@ -31,14 +33,14 @@ digit : the number of digits in the output, left padded with '0' as required
 """
 def provision(tup):
 	"""
-	Convert a 9-tuple into a well-formed URI
+	Convert a type URI 9-tuple into a well-formed URI string
 	"""
 	#Partitioning
 	type, name, secret, issuer, algorithm, digits, period = tup
 
 	#Assembling
 	uri = "otpauth://" + type + "/" + issuer + ":" + name + "?" +\
-	"secret=" + str(secret) +\
+	"secret=" + secret +\
 	"&issuer=" + issuer +\
 	"&algorithm=" + algorithm.upper() +\
 	"&digits=" + str(digits) +\
@@ -48,7 +50,7 @@ def provision(tup):
 
 def deprovision(uri):
 	"""
-	Converts a URI into a 9-tuple
+	Convert a URI string into a typed URI 9-tuple
 	"""
 
 	#Partitioning
@@ -68,10 +70,15 @@ def deprovision(uri):
 
 	return tup
 
-def T(t, X=30):
+def T(t=time.time(), X=30):
 	"""
 	Return number of time steps between T0 (the Unix epoch) and t.
 	"""
+	#time.time() provides a time as a floating point integer,
+	#this can cause problems later
+	if type(t) == float:
+		t = int(math.floor(t))
+
 	#Down-cast struct_time types to an integer
 	#number of seconds, if needed
 	if type(t) == time.struct_time:
@@ -81,23 +88,59 @@ def T(t, X=30):
 	# and integer division
 	return int(t // X)
 
-def HOTP(K,C,digit=6, mode="sha1"):
+def HOTP(K,C,digit=6, digest=hashlib.sha1):
 	"""
-	Return the HOTP-value for Key <K>, Counter <C>, with <digits> width,
-	and hashing mode <mode>. Return type is a string.
+	Return the HOTP-value for base-32 representation Key <K>,
+	Counter <C>, with <digits> width, and hashing mode <mode>.
+	Return type is a string.
 	"""
-	if mode not in MODES:
-		raise ValueError(of correct type=)
-	value = 0xc0ffee
-	value %= 10 ** 6
-	return str(value).rjust(digit,"0")
+	#Sanity check on digest mode
+	try:
+		if type(digest) == str:
+			digest = DIGESTS[digest]
+	except ValueError:
+		print("Digest mode (%s) not one of: %s" % (str(digest), str(hashlib.algorithms_guaranteed)))
 
-def TOTP(K,T,digit=6, mode="sha1"):
+	# Pad the secret; it must have a length of
+	# a multiple of block size (8)
+	# Then decode it to a bytes object
+	K = str(K)
+	print("K", K)
+	pad = len(K) % 8
+	if pad != 0:
+		K += '=' * (8 - pad)
+		print("K", K)
+		K = base64.b32decode(K, casefold=True)
+
+	# Convert the counter to a byte array
+	ba = bytearray()
+	while C != 0:
+		ba.append(C & 0xFF)
+		C >>= 8
+	C = bytes(bytearray(reversed(ba)).rjust(8, b'\0'))
+
+	# Initialize the HMAC-SHA hasher
+	hasher = hmac.new(K,C, digest)
+	hm = bytearray(hasher.digest())
+
+	# Truncate as specified in RFC
+	offset = hm[-1] & 0xf
+	code = ((hm[offset] & 0x7f) << 24 | (hm[offset + 1] & 0xff) << 16 | (hm[offset + 2] & 0xff) << 8 | (hm[offset + 3] & 0xff))
+	str_code = str(code % 10 ** digit)
+
+	# Left pad with zeros
+	str_code = str_code.rjust(digit, '0')
+
+	return str_code
+
+def TOTP(K,C=None,digit=6,digest=hashlib.sha1):
 	"""
-	Return the TOTP-value for Key <K>, Time Step <T>, with <digits> width,
-	and hashing mode <mode>. Return type is a string.
+	Return the TOTP-value for Key <K>, Time Step as Counter <C>,
+	with <digits> width, and hash digest <mode>. Return type is a string.
 	"""
-	return HOTP(K,T,digit)
+	if not C:
+		C = T()
+	return HOTP(K,C,digit=digit,digest=digest)
 
 if __name__ == "__main__":
 
