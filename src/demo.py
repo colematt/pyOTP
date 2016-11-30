@@ -20,6 +20,36 @@ except(ImportError):
 """
 Utility functions
 """
+def _readURI(uri):
+	"""
+	Read a URI from a .png image file. Return its contents as a pretty string.
+	"""
+	### QR Code reading using zbarlite
+	try:
+		with open(uri, 'rb') as image_file:
+			image = Image.open(image_file)
+			image.load()
+		codes = zbarlight.scan_codes('qrcode', image)
+	except(IOError):
+		print("Cannot open %s" % uri, file=sys.stderr)
+		return
+
+	#If there's a readable barcode, deprovision it
+	if len(codes) == 1:
+		type,name,secret,issuer,algorithm,digits,period = otp.deprovision(codes[0].decode())
+	else:
+		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), uri), file=sys.stderr)
+		return
+
+	#Log URI contents
+	print("Type:", type)
+	print("Name:", name)
+	print("Secret:", secret)
+	print("Issuer:", issuer)
+	print("Algorithm:", algorithm)
+	print("Digits:", digits)
+	print("Period:", period)
+
 def _header(mode="TOTP", digits=6):
 	return  " ".join(["Timestamp".ljust(24), "Time Step".ljust(18), mode.ljust(digits), "Expired".ljust(10),\
 					  "\n"+"-"*24,           "-"*18,                "-"*digits,         "-"*10])
@@ -78,6 +108,9 @@ if __name__ == "__main__":
 	else:
 		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), args.qrfile), file=sys.stderr)
 		exit(0)
+
+	# Print the URI read
+	#_readURI(args.qrfile)
 
 	# Print the header
 	print(_header())
