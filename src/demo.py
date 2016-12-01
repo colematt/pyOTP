@@ -20,7 +20,7 @@ except(ImportError):
 """
 Utility functions
 """
-def _readURI(uri):
+def _printURI(uri):
 	"""
 	Read a URI from a .png image file. Return its contents as a pretty string.
 	"""
@@ -86,7 +86,8 @@ def _expirebar(t, width=10, filltime=30):
 if __name__ == "__main__":
 
 	# Argument parsing
-	parser = argparse.ArgumentParser(description='Demonstrate the TOTP algorithm')
+	parser = argparse.ArgumentParser(description='demonstrate the TOTP algorithm')
+	parser.add_argument('--displayuri', help='display the contents of the URI', action="store_true")
 	parser.add_argument('qrfile', help="path to the shared secret key QR Code .png file")
 	args = parser.parse_args()
 
@@ -110,7 +111,8 @@ if __name__ == "__main__":
 		exit(0)
 
 	# Print the URI read
-	#_readURI(args.qrfile)
+	if args.displayuri:
+		_printURI(args.qrfile)
 
 	# Print the header
 	print(_header())
