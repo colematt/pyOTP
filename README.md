@@ -12,7 +12,7 @@
 |----------|---------|
 | [Python](https://www.python.org/downloads/)  | Tested with Python 3.5.0. Will not work with Python 2 |
 | _Mac OS_: [Macports](https://www.macports.org/install.php)|  Tested with Macports for macOS Sierra v10.12 |
-| [Zbar](http://zbar.sourceforge.net/download.html) | Tested with zbar v0.10 |
+|_Mac OS_: [Zbar](http://zbar.sourceforge.net/download.html) | Tested with zbar v0.10 |
 
 `pyOTP` has been tested on the following operating systems:
 
@@ -39,14 +39,14 @@
         $ pip3 install zbarlight
 
 ### Linux
-1. Install `zbar` and its header files using your package manager:
+1. Install `zbar` and its header files, as well as `pip` for Python3 using your package manager:
 
-        $ apt-get install libzbar0 libzbar-dev
+        $ apt-get install libzbar0 libzbar-dev python3-pip
 
 2. Install `zbarlight` wrapper using pip:
 
         $ pip3 install zbarlight
-  
+
 ## Usage
 
     /usr/bin/env python3 demo.py [-h] [--displayuri] qrfile
