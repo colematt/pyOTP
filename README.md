@@ -4,7 +4,7 @@
 * HMAC-based One-Time Password (HOTP) proposed by [RFC 4226](https://tools.ietf.org/html/rfc4226).
 * Time-based One-Time Password (TOTP) proposed by [RFC 6238](https://tools.ietf.org/html/rfc6238).
 
-`pyOTP` uses [`zbarlight`](https://github.com/Polyconseil/zbarlight) to read qrcodes as a source for the shared key.
+`pyOTP` uses [`zbarlight`](https://github.com/Polyconseil/zbarlight) to read QR codes as a source for the shared key, and [`dateutil`](https://dateutil.readthedocs.io/en/stable/parser.html#) to parse time strings for the HOTP counter value.
 
 ## Requirements
 
@@ -36,16 +36,16 @@
 
 4. Install `zbarlight` wrapper using pip:
 
-        $ pip3 install zbarlight
+        $ pip3 install zbarlight python-dateutil
 
 ### Linux
 1. Install `zbar` and its header files, as well as `pip` for Python3 using your package manager:
 
-        $ apt-get install libzbar0 libzbar-dev python3-pip
+        $ sudo apt install libzbar0 libzbar-dev python3-pip
 
 2. Install `zbarlight` wrapper using pip:
 
-        $ pip3 install zbarlight
+        $ pip3 install zbarlight python-dateutil
 
 ## Usage
 
