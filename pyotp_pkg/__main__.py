@@ -10,6 +10,7 @@ import sys
 import otp
 import provision
 import argparse
+import hashlib
 
 try:
 	from PIL import Image
@@ -31,14 +32,14 @@ def _printURI(uri):
 		codes = zbarlight.scan_codes('qrcode', image)
 	except(IOError):
 		print("Cannot open %s" % uri, file=sys.stderr)
-		return
+		raise
 
 	#If there's a readable barcode, deprovision it
 	if len(codes) == 1:
 		type,name,secret,issuer,algorithm,digits,period = otp.deprovision(codes[0].decode())
 	else:
 		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), uri), file=sys.stderr)
-		return
+		raise IOError
 
 	#Log URI contents
 	print("Type:", type)
@@ -102,8 +103,8 @@ if __name__ == "__main__":
 
 	#If there's a readable barcode, deprovision it
 	if len(codes) == 1:
-		_,_,secret,_,mode,digit,x = otp.deprovision(codes[0].decode())
-		mode = otp.DIGESTS[mode]
+		_,_,secret,_,mode,digit,x = provision.deprovision(codes[0].decode())
+		mode = getattr(hashlib,mode.lower())
 
 	else:
 		print("Found %i valid QR Codes in %s. Cannot decode!" % (len(codes), args.qrfile), file=sys.stderr)
@@ -134,11 +135,11 @@ if __name__ == "__main__":
 			_expirebar(now, filltime=x)
 		except (KeyboardInterrupt, SystemExit):
 			print("\nExiting OTP Demo...")
+			sys.exit(0)
 		finally:
 			print("")
 			sys.stdout.flush()
-			sys.exit(0)
-
+			
 		# Step forward, recalculate T
 		now = next
 		next += x

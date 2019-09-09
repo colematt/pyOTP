@@ -1,1 +1,1 @@
-name = "pyOTP"
+name = "pyotp_pkg"

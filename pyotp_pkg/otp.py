@@ -34,9 +34,13 @@ def T(t=time.time(), X=30):
 	Raises ValueError for invalid or unknown string format, if the provided tzinfo is not in a valid format, or if an invalid date would be created. 
 	Raises OverflowError if the parsed date exceeds the largest valid C integer on your system.
 	"""
+
+	# t is already usable (user probably passed int(time.time()) as argument)
+	if type(t) == int:
+		pass
 	#time.time() provides current time as a floating point integer,
 	#this can cause problems later
-	if type(t) == float:
+	elif type(t) == float:
 		t = int(math.floor(t))
 
 	#Down-cast struct_time types to an integer number of seconds
