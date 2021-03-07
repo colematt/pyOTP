@@ -9,13 +9,7 @@ import time
 import sys
 import otp
 import argparse
-try:
-	from PIL import Image
-	import zbarlight
-except(ImportError):
-	print("Prerequisites not met! pyOTP requires zbarlight.", file=sys.stderr)
-	print("See https://github.com/Polyconseil/zbarlight for more information.", file=sys.stderr)
-	sys.exit(0)
+
 
 """
 Utility functions
